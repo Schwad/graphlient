@@ -1,16 +1,14 @@
-Query = GraphQL::ObjectType.define do
-  name 'Query'
+require_relative '../types/invoice_type'
+class Query < GraphQL::Schema::Object
+  field :invoice, InvoiceType, null: true do
+    argument :id, Integer, required: false
+    description 'Find invoice'
+  end
 
-  field :invoices, types[InvoiceType] do
-    argument :ids, types[types.Int]
-    description 'Find Invoices'
-    resolve ->(_obj, args, _ctx) {
-      (args[:ids] || []).map do |id|
-        OpenStruct.new(
-          id: id,
-          fee_in_cents: 20_000
-        )
-      end
-    }
+  def invoice(id:)
+    OpenStruct.new(
+      id: id,
+      fee_in_cents: 20_000
+    )
   end
 end

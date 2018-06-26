@@ -26,8 +26,13 @@ module Graphlient
       end
 
       def create_detail(detail)
-        message = detail['message']
-        [message, create_problems(detail['problems']).compact.join("\n  ")].join("\n  ")
+        if detail.key?('problems')
+          [detail['message'], create_problems(detail['problems']).compact.join("\n  ")].join("\n  ")
+        elsif detail.key?('path')
+          [detail['path'].compact.join(" "), detail['message']].join(": ")
+        else
+          detail['message']
+        end
       end
 
       def create_problems(problems)
