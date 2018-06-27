@@ -7,11 +7,11 @@ class CreateInvoice < GraphQL::Schema::RelayClassicMutation
   field :errors, [String], null: true
 
   def resolve(fee_in_cents:)
-    [
-      OpenStruct.new(
+    {
+      invoice: OpenStruct.new(
         id: 1231,
         fee_in_cents: fee_in_cents
       )
-    ]
+    }
   end
 end

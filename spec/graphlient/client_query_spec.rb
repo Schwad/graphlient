@@ -10,7 +10,7 @@ describe Graphlient::Client do
           query do
             invoice(id: 10) do
               id
-              fee_in_cents
+              feeInCents
             end
           end
         end
@@ -23,7 +23,7 @@ describe Graphlient::Client do
       it '#execute' do
         response = client.execute(query)
         invoice = response.data.invoice
-        expect(invoice.id).to eq 10
+        expect(invoice.id).to eq '10'
       end
     end
 
@@ -46,14 +46,14 @@ describe Graphlient::Client do
       it '#execute' do
         response = client.execute(query, some_id: 42)
         invoice = response.data.invoice
-        expect(invoice.id).to eq 42
+        expect(invoice.id).to eq '42'
         expect(invoice.fee_in_cents).to eq 20_000
       end
 
       it '#execute without variables' do
         response = client.execute(query)
         invoice = response.data.invoice
-        expect(invoice).to eq([])
+        expect(invoice).to be_nil
       end
     end
 
@@ -80,7 +80,7 @@ describe Graphlient::Client do
         expect do
           client.execute(query, id: '42')
         end.to raise_error Graphlient::Errors::GraphQLError do |e|
-          expect(e.to_s).to eq "Variable id of type [Int] was provided invalid value\n  0: Could not coerce value \"42\" to Int"
+          expect(e.to_s).to eq "Variable id of type Int was provided invalid value\n  Could not coerce value \"42\" to Int"
         end
       end
 
@@ -101,14 +101,14 @@ describe Graphlient::Client do
         expect do
           client.query do
             query do
-              invoice(id: 10) do
+              invoices(id: 10) do
                 id
                 feeInCents
               end
             end
           end
         end.to raise_error Graphlient::Errors::ClientError do |e|
-          expect(e.to_s).to eq "Field 'invoice' doesn't exist on type 'Query'"
+          expect(e.to_s).to eq "Field 'invoices' doesn't exist on type 'Query'"
         end
       end
 
@@ -146,17 +146,17 @@ describe Graphlient::Client do
         response = client.query do
           mutation do
             createInvoice(input: { feeInCents: 12_345 }) do
-              invoice{
+              invoice do
                 id
                 feeInCents
-              }
+              end
               errors
             end
           end
         end
 
-        invoice = response.data.create_invoice
-        expect(invoice.id).to eq 1231
+        invoice = response.data.create_invoice.invoice
+        expect(invoice.id).to eq '1231'
         expect(invoice.fee_in_cents).to eq 12_345
       end
     end
@@ -167,16 +167,16 @@ describe Graphlient::Client do
           client.query do
             mutation(input: :CreateInvoiceInput!) do
               createInvoice(input: :input) do
-                invoice{
+                invoice do
                   id
                   feeInCents
-                }
+                end
                 errors
               end
             end
           end
         end.to raise_error Graphlient::Errors::GraphQLError,
-                           "Variable input of type CreateInvoiceInput! was provided invalid value\n  : Expected value to not be null"
+                           "Variable input of type CreateInvoiceInput! was provided invalid value\n  Expected value to not be null"
       end
 
       it 'returns a response from a query' do
@@ -195,20 +195,19 @@ describe Graphlient::Client do
       end
 
       it 'executes the mutation' do
-        response = client.query(input: { fee_in_cents: 12_345 }) do
+        response = client.query(input: { feeInCents: 12_345 }) do
           mutation(input: :CreateInvoiceInput!) do
             createInvoice(input: :input) do
-              invoice{
+              invoice do
                 id
                 feeInCents
-              }
+              end
               errors
             end
           end
         end
-
-        invoice = response.data.create_invoice
-        expect(invoice.id).to eq 1231
+        invoice = response.data.create_invoice.invoice
+        expect(invoice.id).to eq '1231'
         expect(invoice.fee_in_cents).to eq 12_345
       end
 
@@ -217,16 +216,16 @@ describe Graphlient::Client do
           client.query(input: {}) do
             mutation(input: :CreateInvoiceInput!) do
               createInvoice(input: :input) do
-                invoice{
+                invoice do
                   id
                   feeInCents
-                }
+                end
                 errors
               end
             end
           end
         end.to raise_error Graphlient::Errors::GraphQLError,
-                           "Variable input of type CreateInvoiceInput! was provided invalid value\n  fee_in_cents: Expected value to not be null"
+                           "Variable input of type CreateInvoiceInput! was provided invalid value\n  feeInCents: Expected value to not be null"
       end
     end
   end
